@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Toystore by jnunemaker</title>
-    
+
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -17,54 +17,248 @@
       <header>
         <h1>Toystore</h1>
         <p>An object mapper for anything that can read, write and delete data.</p>
+
         <p class="view"><a href="https://github.com/jnunemaker/toystore">View the Project on GitHub <small>jnunemaker/toystore</small></a></p>
+
+
         <ul>
           <li><a href="https://github.com/jnunemaker/toystore/zipball/master">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/jnunemaker/toystore/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/jnunemaker/toystore">Fork On <strong>GitHub</strong></a></li>
+          <li><a href="https://github.com/jnunemaker/toystore">View On <strong>GitHub</strong></a></li>
         </ul>
       </header>
       <section>
-        <h2>Install</h2>
+        <h1>Toystore</h1>
 
-<pre><code>gem install toystore
-</code></pre>
+<p>An object mapper for any <a href="https://github.com/jnunemaker/adapter">adapter</a> that can read, write, delete, and clear data.</p>
 
-<h2>Overview</h2>
+<h2>Examples</h2>
 
-<p>Toystore is built on top of <a href="https://github.com/rails/rails/tree/master/activemodel">Active Model</a> and <a href="http://jnunemaker.github.com/adapter/">Adapter</a> (<a href="https://github.com/jnunemaker/adapter/wiki">wiki</a>). Adapter is a simple gem for adapting a particular client to one simple API (similar to Ruby's hash API). Adapter actually ships with a memory adapter, which is used by default in Toystore. You can also define it yourself like this:</p>
+<p>The project comes with two main includes that you can use -- Toy::Object and Toy::Store.</p>
 
-<div class="highlight">
-<pre><span class="nb">require</span> <span class="s1">'adapter/memory'</span>
-<span class="nb">require</span> <span class="s1">'toystore'</span>
+<p><strong>Toy::Object</strong> comes with all the goods you need for plain old ruby objects -- attributes, dirty attribute tracking, equality, inheritance, serialization, cloning, logging and pretty inspecting.</p>
 
-<span class="k">class</span> <span class="nc">User</span>
-  <span class="kp">include</span> <span class="no">Toy</span><span class="o">::</span><span class="no">Store</span>
-  <span class="n">adapter</span> <span class="ss">:memory</span><span class="p">,</span> <span class="p">{}</span>
+<p><strong>Toy::Store</strong> includes Toy::Object and adds identity, persistence and querying through adapters, mass assignment, callbacks, validations and a few simple associations (lists and references).</p>
 
-  <span class="n">attribute</span> <span class="ss">:name</span><span class="p">,</span> <span class="nb">String</span>
-<span class="k">end</span>
-</pre>
-</div>
+<h3>Toy::Object</h3>
 
+<p>First, join me in a whirlwind tour of Toy::Object.</p>
 
-<p>Simply include Toy::Store and then declare where you would like to store your data by passing the adapter name and an the client to the store method. From there you can declare your attributes and do anything else you want. There are <a href="https://github.com/jnunemaker/toystore/tree/master/examples">several examples</a> included with the source.</p>
-
-<p>If you change your mind and would like to store your data in Mongo, instead of just in memory, you can simply change the adapter:</p>
-
-<div class="highlight">
-<pre><span class="nb">require</span> <span class="s1">'adapter/mongo'</span>
-<span class="nb">require</span> <span class="s1">'toystore'</span>
-
-<span class="k">class</span> <span class="nc">User</span>
-  <span class="kp">include</span> <span class="no">Toy</span><span class="o">::</span><span class="no">Store</span>
-  <span class="n">adapter</span> <span class="ss">:mongo</span><span class="p">,</span> <span class="no">Mongo</span><span class="o">::</span><span class="no">Connection</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">db</span><span class="p">(</span><span class="s1">'adapter'</span><span class="p">)</span><span class="o">[</span><span class="s1">'testing'</span><span class="o">]</span>
+<div class="highlight"><pre><span class="k">class</span> <span class="nc">Person</span>
+  <span class="kp">include</span> <span class="ss">Toy</span><span class="p">:</span><span class="ss">:Object</span>
 
   <span class="n">attribute</span> <span class="ss">:name</span><span class="p">,</span> <span class="nb">String</span>
+  <span class="n">attribute</span> <span class="ss">:age</span><span class="p">,</span>  <span class="nb">Integer</span>
 <span class="k">end</span>
-</pre>
-</div>
 
+<span class="c1"># Pretty class inspecting</span>
+<span class="n">pp</span> <span class="no">Person</span>
+
+<span class="n">john</span>  <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'John'</span><span class="p">,</span>  <span class="ss">:age</span> <span class="o">=&gt;</span> <span class="mi">30</span><span class="p">)</span>
+<span class="n">steve</span> <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'Steve'</span><span class="p">,</span> <span class="ss">:age</span> <span class="o">=&gt;</span> <span class="mi">31</span><span class="p">)</span>
+
+<span class="c1"># Pretty inspecting</span>
+<span class="n">pp</span> <span class="n">john</span>
+
+<span class="c1"># Attribute dirty tracking</span>
+<span class="n">john</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">'NEW NAME!'</span>
+<span class="n">pp</span> <span class="n">john</span><span class="o">.</span><span class="n">changes</span>       <span class="c1"># {"name"=&gt;["John", "NEW NAME!"], "age"=&gt;[nil, 30]}</span>
+<span class="n">pp</span> <span class="n">john</span><span class="o">.</span><span class="n">name_changed?</span> <span class="c1"># true</span>
+
+<span class="c1"># Equality goodies</span>
+<span class="n">pp</span> <span class="n">john</span><span class="o">.</span><span class="n">eql?</span><span class="p">(</span><span class="n">john</span><span class="p">)</span>  <span class="c1"># true</span>
+<span class="n">pp</span> <span class="n">john</span><span class="o">.</span><span class="n">eql?</span><span class="p">(</span><span class="n">steve</span><span class="p">)</span> <span class="c1"># false</span>
+<span class="n">pp</span> <span class="n">john</span> <span class="o">==</span> <span class="n">john</span>     <span class="c1"># true</span>
+<span class="n">pp</span> <span class="n">john</span> <span class="o">==</span> <span class="n">steve</span>    <span class="c1"># false</span>
+
+<span class="c1"># Cloning</span>
+<span class="n">pp</span> <span class="n">john</span><span class="o">.</span><span class="n">clone</span>
+
+<span class="c1"># Inheritance</span>
+<span class="k">class</span> <span class="nc">AwesomePerson</span> <span class="o">&lt;</span> <span class="no">Person</span>
+<span class="k">end</span>
+
+<span class="n">pp</span> <span class="no">Person</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">sort</span>          <span class="c1"># ["age", "name"]</span>
+<span class="n">pp</span> <span class="no">AwesomePerson</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">sort</span>   <span class="c1"># ["age", "name", "type"]</span>
+
+<span class="c1"># Serialization</span>
+<span class="nb">puts</span> <span class="n">john</span><span class="o">.</span><span class="n">to_json</span>
+<span class="nb">puts</span> <span class="n">john</span><span class="o">.</span><span class="n">to_xml</span>
+</pre></div>
+
+<p>Ok, that was definitely awesome. Please continue on your personal journey to a blown mind (very similar to a beautiful mind).</p>
+
+<h3>Toy::Store</h3>
+
+<p>Toy::Store is a unique bird that builds on top of Toy::Object. Below is a quick sample of what it can do.</p>
+
+<div class="highlight"><pre><span class="k">class</span> <span class="nc">Person</span>
+  <span class="kp">include</span> <span class="ss">Toy</span><span class="p">:</span><span class="ss">:Store</span>
+
+  <span class="n">attribute</span> <span class="ss">:name</span><span class="p">,</span> <span class="nb">String</span>
+  <span class="n">attribute</span> <span class="ss">:age</span><span class="p">,</span>  <span class="nb">Integer</span><span class="p">,</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="mi">0</span>
+<span class="k">end</span>
+
+<span class="c1"># Persistence</span>
+<span class="n">john</span> <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'John'</span><span class="p">,</span> <span class="ss">:age</span> <span class="o">=&gt;</span> <span class="mi">30</span><span class="p">)</span>
+<span class="n">pp</span> <span class="n">john</span>
+<span class="n">pp</span> <span class="n">john</span><span class="o">.</span><span class="n">persisted?</span>
+
+<span class="c1"># Mass Assignment Security</span>
+<span class="no">Person</span><span class="o">.</span><span class="n">attribute</span> <span class="ss">:role</span><span class="p">,</span> <span class="nb">String</span><span class="p">,</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="s1">'guest'</span>
+<span class="no">Person</span><span class="o">.</span><span class="n">attr_accessible</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:age</span>
+
+<span class="n">person</span> <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'Hacker'</span><span class="p">,</span> <span class="ss">:age</span> <span class="o">=&gt;</span> <span class="mi">13</span><span class="p">,</span> <span class="ss">:role</span> <span class="o">=&gt;</span> <span class="s1">'admin'</span><span class="p">)</span>
+<span class="n">pp</span> <span class="n">person</span><span class="o">.</span><span class="n">role</span> <span class="c1"># "guest"</span>
+
+<span class="c1"># Querying</span>
+<span class="n">pp</span> <span class="no">Person</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">john</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="n">pp</span> <span class="no">Person</span><span class="o">.</span><span class="n">read_multiple</span><span class="p">(</span><span class="o">[</span><span class="n">john</span><span class="o">.</span><span class="n">id</span><span class="o">]</span><span class="p">)</span>
+<span class="n">pp</span> <span class="no">Person</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">'NOT HERE'</span><span class="p">)</span> <span class="c1"># nil</span>
+
+<span class="k">begin</span>
+  <span class="no">Person</span><span class="o">.</span><span class="n">read!</span><span class="p">(</span><span class="s1">'NOT HERE'</span><span class="p">)</span>
+<span class="k">rescue</span> <span class="ss">Toy</span><span class="p">:</span><span class="ss">:NotFound</span>
+  <span class="nb">puts</span> <span class="s2">"Could not find person with id of 'NOT HERE'"</span>
+<span class="k">end</span>
+
+<span class="c1"># Reloading</span>
+<span class="n">pp</span> <span class="n">john</span><span class="o">.</span><span class="n">reload</span>
+
+<span class="c1"># Callbacks</span>
+<span class="k">class</span> <span class="nc">Person</span>
+  <span class="n">before_create</span> <span class="ss">:add_fifty_to_age</span>
+
+  <span class="k">def</span> <span class="nf">add_fifty_to_age</span>
+    <span class="nb">self</span><span class="o">.</span><span class="n">age</span> <span class="o">+=</span> <span class="mi">50</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">pp</span> <span class="no">Person</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:age</span> <span class="o">=&gt;</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">age</span> <span class="c1"># 60</span>
+
+<span class="c1"># Validations</span>
+<span class="k">class</span> <span class="nc">Person</span>
+  <span class="n">validates_presence_of</span> <span class="ss">:name</span>
+<span class="k">end</span>
+
+<span class="n">person</span> <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">new</span>
+<span class="n">pp</span> <span class="n">person</span><span class="o">.</span><span class="n">valid?</span>        <span class="c1"># false</span>
+<span class="n">pp</span> <span class="n">person</span><span class="o">.</span><span class="n">errors</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span> <span class="c1"># ["can't be blank"]</span>
+
+<span class="c1"># Lists (array key stored as attribute)</span>
+<span class="k">class</span> <span class="nc">Skill</span>
+  <span class="kp">include</span> <span class="ss">Toy</span><span class="p">:</span><span class="ss">:Store</span>
+
+  <span class="n">attribute</span> <span class="ss">:name</span><span class="p">,</span> <span class="nb">String</span>
+  <span class="n">attribute</span> <span class="ss">:truth</span><span class="p">,</span> <span class="no">Boolean</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Person</span>
+  <span class="n">list</span> <span class="ss">:skills</span><span class="p">,</span> <span class="no">Skill</span>
+<span class="k">end</span>
+
+<span class="n">john</span><span class="o">.</span><span class="n">skills</span> <span class="o">=</span> <span class="o">[</span><span class="no">Skill</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'Programming'</span><span class="p">,</span> <span class="ss">:truth</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">)</span><span class="o">]</span>
+<span class="n">john</span><span class="o">.</span><span class="n">skills</span> <span class="o">&lt;&lt;</span> <span class="no">Skill</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'Mechanic'</span><span class="p">,</span> <span class="ss">:truth</span> <span class="o">=&gt;</span> <span class="kp">false</span><span class="p">)</span>
+
+<span class="n">pp</span> <span class="n">john</span><span class="o">.</span><span class="n">skills</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:id</span><span class="p">)</span> <span class="o">==</span> <span class="n">john</span><span class="o">.</span><span class="n">skill_ids</span> <span class="c1"># true</span>
+
+<span class="c1"># References (think foreign keyish)</span>
+<span class="k">class</span> <span class="nc">Person</span>
+  <span class="n">reference</span> <span class="ss">:mom</span><span class="p">,</span> <span class="no">Person</span>
+<span class="k">end</span>
+
+<span class="n">mom</span> <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'Mum'</span><span class="p">)</span>
+<span class="n">john</span><span class="o">.</span><span class="n">mom</span> <span class="o">=</span> <span class="n">mom</span>
+<span class="n">john</span><span class="o">.</span><span class="n">save</span>
+<span class="n">pp</span> <span class="n">john</span><span class="o">.</span><span class="n">reload</span><span class="o">.</span><span class="n">mom_id</span> <span class="o">==</span> <span class="n">mom</span><span class="o">.</span><span class="n">id</span> <span class="c1"># true</span>
+
+<span class="c1"># Identity Map</span>
+<span class="ss">Toy</span><span class="p">:</span><span class="ss">:IdentityMap</span><span class="o">.</span><span class="n">use</span> <span class="k">do</span>
+  <span class="n">frank</span> <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'Frank'</span><span class="p">)</span>
+
+  <span class="n">pp</span> <span class="no">Person</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">frank</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">equal?</span><span class="p">(</span><span class="n">frank</span><span class="p">)</span>                <span class="c1"># true</span>
+  <span class="n">pp</span> <span class="no">Person</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">frank</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">object_id</span> <span class="o">==</span> <span class="n">frank</span><span class="o">.</span><span class="n">object_id</span> <span class="c1"># true</span>
+<span class="k">end</span>
+
+<span class="c1"># Or you can turn it on globally</span>
+<span class="ss">Toy</span><span class="p">:</span><span class="ss">:IdentityMap</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="n">frank</span> <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'Frank'</span><span class="p">)</span>
+
+<span class="n">pp</span> <span class="no">Person</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">frank</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">equal?</span><span class="p">(</span><span class="n">frank</span><span class="p">)</span>                <span class="c1"># true</span>
+<span class="n">pp</span> <span class="no">Person</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">frank</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">object_id</span> <span class="o">==</span> <span class="n">frank</span><span class="o">.</span><span class="n">object_id</span> <span class="c1"># true</span>
+
+<span class="c1"># All persistence runs through an adapter.</span>
+<span class="c1"># All of the above examples used the default in-memory adapter.</span>
+<span class="c1"># Looks something like this:</span>
+<span class="no">Person</span><span class="o">.</span><span class="n">adapter</span> <span class="ss">:memory</span><span class="p">,</span> <span class="p">{}</span>
+
+<span class="nb">puts</span> <span class="s2">"Adapter: </span><span class="si">#{</span><span class="no">Person</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">inspect</span><span class="si">}</span><span class="s2">"</span>
+
+<span class="c1"># You can make a new adapter to your awesome new/old data store</span>
+<span class="no">Adapter</span><span class="o">.</span><span class="n">define</span><span class="p">(</span><span class="ss">:append_only_array</span><span class="p">)</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">record</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">reverse</span><span class="o">.</span><span class="n">detect</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="n">row</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="n">key</span> <span class="p">})</span>
+      <span class="n">record</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="n">client</span> <span class="o">&lt;&lt;</span> <span class="o">[</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">]</span>
+    <span class="n">value</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">delete_if</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="n">row</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="n">key</span> <span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">clear</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">clear</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="o">[]</span>
+<span class="no">Person</span><span class="o">.</span><span class="n">adapter</span> <span class="ss">:append_only_array</span><span class="p">,</span> <span class="n">client</span>
+
+<span class="n">pp</span> <span class="s2">"Client: </span><span class="si">#{</span><span class="no">Person</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">equal?</span><span class="p">(</span><span class="n">client</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+
+<span class="n">person</span> <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'Phil'</span><span class="p">,</span> <span class="ss">:age</span> <span class="o">=&gt;</span> <span class="mi">55</span><span class="p">)</span>
+<span class="n">person</span><span class="o">.</span><span class="n">age</span> <span class="o">=</span> <span class="mi">56</span>
+<span class="n">person</span><span class="o">.</span><span class="n">save</span>
+
+<span class="n">pp</span> <span class="n">client</span>
+
+<span class="n">pp</span> <span class="no">Person</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">person</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> <span class="c1"># Phil with age 56</span>
+</pre></div>
+
+<p>If that doesn't excite you, nothing will. At this point, you are probably wishing for more.</p>
+
+<p>Luckily, there is an entire directory full of <a href="https://github.com/jnunemaker/toystore/tree/master/examples">examples</a> and I created a few power user guides, which I will kindly link next.</p>
+
+<h2>Instrumentation</h2>
+
+<p>ToyStore comes with a log subscriber and automatic metriks instrumentation. By
+default these work with ActiveSupport::Notifications, but only require the
+pieces of ActiveSupport that are needed and only do so if you actually attempt
+to require the instrumentation files listed below.</p>
+
+<p>To use the log subscriber:</p>
+
+<div class="highlight"><pre><span class="c1"># Gemfile</span>
+<span class="n">gem</span> <span class="s1">'activesupport'</span>
+
+<span class="c1"># config/initializers/toystore.rb (or wherever you want it)</span>
+<span class="nb">require</span> <span class="s1">'toy/instrumentation/log_subscriber'</span>
+</pre></div>
+
+<p>To use the metriks instrumentation:</p>
+
+<div class="highlight"><pre><span class="c1"># Gemfile</span>
+<span class="n">gem</span> <span class="s1">'activesupport'</span>
+<span class="n">gem</span> <span class="s1">'metriks'</span>
+
+<span class="c1"># config/initializers/toystore.rb (or wherever you want it)</span>
+<span class="nb">require</span> <span class="s1">'toy/instrumentation/metriks'</span>
+</pre></div>
 
 <h2>ToyStore Power User Guides</h2>
 
@@ -80,8 +274,8 @@
 <h2>Compatibility</h2>
 
 <ul>
-<li>Rails 3, Sinatra, etc. No Rails 2 (because it uses Active Model).</li>
-<li>Ruby 1.8.7, 1.9.2, 1.9.3 (specs are run against each before releases)</li>
+<li>Rails 3.0.*, 3.1.*, 3.2.*, Sinatra, etc. No Rails 2 (because it uses Active Model).</li>
+<li>Ruby 1.9.3 only</li>
 </ul><h2>Mailing List</h2>
 
 <p><a href="https://groups.google.com/forum/#!forum/toystoreadapter">https://groups.google.com/forum/#!forum/toystoreadapter</a></p>
