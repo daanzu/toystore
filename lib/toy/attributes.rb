@@ -6,7 +6,7 @@ module Toy
     included do
       # blank suffix is no longer needed in 3.2+
       # open to suggestions on how to do this better
-      if ActiveSupport::VERSION::MAJOR == 3 && ActiveSupport::VERSION::MINOR < 2
+      if defined?(ActiveSupport::VERSION) && ActiveSupport::VERSION::MAJOR == 3 && ActiveSupport::VERSION::MINOR < 2
         attribute_method_suffix('')
       end
 
